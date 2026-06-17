@@ -2,8 +2,7 @@
 # anow2008 - Enigma2 GitHub Skin Installer Script
 
 # --- روابط جيت هاب المباشرة (Raw Links) ---
-# ضع هنا رابط ملف الـ tar.gz الخاص بالاسكين بتاعك على جيت هاب
-URL_TAR_GZ="https://raw.githubusercontent.com/anow2008/skins/main/myskin/skin.tar.gz"
+URL_TAR_GZ="https://raw.githubusercontent.com/anow2008/skin/main/skin.tar.gz"
 # -------------------------------------------
 
 ARCHIVE_PATH="/tmp/skin.tar.gz"
@@ -31,7 +30,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "====== [3/4] Installing Skin IPK File(s) ======"
-# تحديث الفيد لضمان تثبيت أي ملفات جرافيكس أو بلجنز مساعدة يعتمد عليها الاسكين
+# تحديث الفيد لضمان التثبيت بدون نقص اعتماديات
 opkg update
 
 # التثبيت
@@ -51,5 +50,10 @@ rm -f "$ARCHIVE_PATH"
 rm -rf "$EXTRACT_DIR"
 
 echo "✅ Done! Skin installation completed successfully."
-echo "💡 Tip: Please restart the Enigma2 GUI to apply the new skin."
+echo "🔄 Restarting Enigma2 GUI to apply changes..."
+sleep 2
+
+# أمر إعادة تشغيل وجهة الرسيفر تلقائياً لتطبيق الاسكين فوراً
+killall -9 enigma2
+
 exit 0
