@@ -1,30 +1,33 @@
 #!/bin/sh
-URL="https://raw.githubusercontent.com/anow2008/skin/main/skins.tar.gz"
-ARCHIVE="/tmp/skins.tar.gz"
-DIR="/tmp/extracted_skin"
+URL="https://raw.githubusercontent.com/anow2008/skin/main/enigma2-plugin-skins-aglare-fhd_8.5_all.ipk"
+IPK="/tmp/enigma2-plugin-skins-aglare-fhd_8.5_all.ipk"
 
-rm -rf "$DIR" "$ARCHIVE"
-mkdir -p "$DIR"
+rm -f "$IPK"
 
-echo "[1/4] Downloading..."
+echo "[1/3] Downloading..."
 if command -v curl >/dev/null 2>&1; then
-    curl -k -L -f -o "$ARCHIVE" "$URL"
+    curl -L -f -o "$IPK" "$URL" 2>/dev/null || {
+        echo "Secure download failed, retrying without certificate check..."
+        curl -k -L -f -o "$IPK" "$URL"
+    }
 else
-    wget --no-check-certificate -O "$ARCHIVE" "$URL" || wget -O "$ARCHIVE" "$URL"
+    wget -q -O "$IPK" "$URL" 2>/dev/null || {
+        echo "Secure download failed, retrying without certificate check..."
+        wget --no-check-certificate -O "$IPK" "$URL"
+    }
 fi
-[ -s "$ARCHIVE" ] || { echo "Download failed"; exit 1; }
+[ -s "$IPK" ] || { echo "Download failed"; rm -f "$IPK"; exit 1; }
 
-echo "[2/4] Extracting..."
-tar -xzf "$ARCHIVE" -C "$DIR" || { echo "Extract failed"; exit 1; }
-
-echo "[3/4] Installing..."
+echo "[2/3] Installing..."
 opkg update
-IPKS=$(find "$DIR" -name "*.ipk")
-[ -n "$IPKS" ] || { echo "No ipk found"; ls -R "$DIR"; exit 1; }
-opkg install --force-overwrite --force-reinstall $IPKS
+if ! opkg install --force-overwrite --force-reinstall "$IPK"; then
+    echo "Install failed"
+    rm -f "$IPK"
+    exit 1
+fi
 
-echo "[4/4] Cleaning..."
-rm -rf "$ARCHIVE" "$DIR"
+echo "[3/3] Cleaning..."
+rm -f "$IPK"
 
 echo "Restarting GUI..."
 sleep 2
